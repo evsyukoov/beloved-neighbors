@@ -104,13 +104,26 @@ compose берёт из имени каталога, и после переим�
 
 ### Вариант 1: собрать прямо на сервере
 
-Нужно ~2 ГБ RAM на время сборки (Gradle качает зависимости внутрь образа).
-
 ```sh
 git clone <repo> && cd beloved_neighbors
 # создать .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+Сборке хватает ~1 ГБ: Dockerfile подменяет настройки Gradle на время сборки
+(`-Xmx640m`, без демона и параллелизма, Kotlin-компилятор в том же процессе) — проектные
+`-Xmx2g` из `gradle.properties` рассчитаны на машину разработчика и на сервере приводят к
+`daemon has disappeared`, то есть к убитому OOM-killer'ом процессу.
+
+Если памяти в обрез и сборка всё равно падает, самый простой выход — добавить swap:
+
+```sh
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Либо вообще не собирать на сервере — см. вариант 2.
 
 ### Вариант 2: собрать локально и перенести образ
 

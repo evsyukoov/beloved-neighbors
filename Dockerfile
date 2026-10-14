@@ -3,6 +3,18 @@ FROM eclipse-temurin:25-jdk AS build
 
 WORKDIR /src
 
+# В gradle.properties проекта стоит -Xmx2g — это для разработки на машине с запасом памяти.
+# На сервере такой демон убивает OOM-killer («daemon has disappeared»), поэтому урезаем
+# аппетиты: настройки в GRADLE_USER_HOME приоритетнее проектных. in-process у Kotlin
+# избавляет от форка ещё одной JVM под компилятор.
+RUN mkdir -p /root/.gradle && printf '%s\n' \
+    'org.gradle.jvmargs=-Xmx640m -XX:MaxMetaspaceSize=320m' \
+    'org.gradle.daemon=false' \
+    'org.gradle.parallel=false' \
+    'org.gradle.caching=false' \
+    'kotlin.compiler.execution.strategy=in-process' \
+    > /root/.gradle/gradle.properties
+
 # сначала только файлы сборки: слой с зависимостями переиспользуется, пока они не менялись
 COPY gradlew settings.gradle.kts build.gradle.kts gradle.properties ./
 COPY gradle gradle
