@@ -1,4 +1,6 @@
-name: beloved-neighbors
+# Формат 2.4, а не Compose Spec: на сервере docker-compose v1, он не знает ключ `name`
+# и теряет `depends_on.condition` в формате 3.x. Compose v2 этот файл тоже понимает.
+version: "2.4"
 
 services:
   app:
