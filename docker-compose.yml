@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: neighbors-postgres
+    environment:
+      POSTGRES_DB: neighbors
+      POSTGRES_USER: neighbors
+      POSTGRES_PASSWORD: neighbors
+    # 5433 снаружи, чтобы не спорить с локальным Postgres на 5432
+    ports:
+      - "5433:5432"
+    volumes:
+      - neighbors-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U neighbors -d neighbors" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  neighbors-pgdata:

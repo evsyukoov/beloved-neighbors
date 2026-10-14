@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+.claude
+build
+.gradle
+.kotlin
+*.log
+.env
+.env.*
+README.md
+docker-compose*.yml
+Dockerfile
+.DS_Store

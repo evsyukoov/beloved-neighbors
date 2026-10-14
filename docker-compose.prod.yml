@@ -1,0 +1,55 @@
+name: beloved-neighbors
+
+services:
+  app:
+    build: .
+    image: beloved-neighbors:latest
+    container_name: neighbors-bot
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?укажи токен от @BotFather в .env}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:?укажи username бота в .env}
+      STICKER_SEX: ${STICKER_SEX:-}
+      STICKER_MOVIE: ${STICKER_MOVIE:-}
+      STICKER_SEX_AND_MOVIE: ${STICKER_SEX_AND_MOVIE:-}
+      DB_URL: jdbc:postgresql://db:5432/neighbors
+      DB_USER: neighbors
+      DB_PASSWORD: ${DB_PASSWORD:?придумай пароль для БД в .env}
+      TZ: Europe/Moscow
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:17-alpine
+    container_name: neighbors-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: neighbors
+      POSTGRES_USER: neighbors
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?придумай пароль для БД в .env}
+      TZ: Europe/Moscow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # по умолчанию слушает только loopback сервера — снаружи попасть можно лишь
+    # через ssh-туннель. DB_BIND=0.0.0.0 откроет базу всему интернету.
+    ports:
+      - "${DB_BIND:-127.0.0.1}:${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U neighbors -d neighbors" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pgdata:

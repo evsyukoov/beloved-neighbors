@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: beloved-neighbors
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/neighbors}
+    username: ${DB_USER:neighbors}
+    password: ${DB_PASSWORD:neighbors}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+
+app:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}
+  # на сколько дней вперёд можно планировать
+  horizon-days: 7
+  timezone: Europe/Moscow
+  # file_id стикеров: пришли боту стикер — он ответит его file_id. Пусто — обойдёмся эмодзи.
+  stickers:
+    sex: ${STICKER_SEX:}
+    movie: ${STICKER_MOVIE:}
+    sex-and-movie: ${STICKER_SEX_AND_MOVIE:}
+
+logging:
+  level:
+    ru.evsyukov.neighbors: DEBUG
